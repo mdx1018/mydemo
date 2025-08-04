@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国朝代变迁史</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .timeline-line {
+            background: linear-gradient(to bottom, #fbbf24, #f59e0b, #d97706, #b45309);
+        }
+        
+        .dynasty-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .dynasty-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .active-dynasty {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+            color: white !important;
+            transform: scale(1.05);
+        }
+        
+        .parallax-bg {
+            background: linear-gradient(45deg, #1e40af, #3b82f6, #60a5fa, #93c5fd);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scroll-fade {
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        
+        .scroll-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-item {
+            width: calc(50% - 2rem);
+        }
+
+        .timeline-item.left {
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .timeline-item.right {
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-item {
+                width: 100%;
+                align-self: center !important;
+                text-align: left !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航 -->
+    <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-gray-800">中华朝代史</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#timeline" class="text-gray-600 hover:text-blue-600 transition-colors">时间轴</a>
+                    <a href="#dynasties" class="text-gray-600 hover:text-blue-600 transition-colors">朝代详情</a>
+                    <a href="#culture" class="text-gray-600 hover:text-blue-600 transition-colors">文化成就</a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section class="parallax-bg min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="relative z-10 text-center text-white px-4">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 fade-in">中华朝代变迁史</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto fade-in">
+                五千年文明史，朝代更迭如星河璀璨
+            </p>
+            <button onclick="scrollToSection('timeline')" 
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all transform hover:scale-105 fade-in">
+                开始探索
+            </button>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- 时间轴区域 -->
+    <section id="timeline" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">朝代时间轴</h2>
+            
+            <div class="relative max-w-6xl mx-auto">
+                <!-- 时间轴主线 -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 w-1 timeline-line h-full"></div>
+                
+                <!-- 时间轴容器 -->
+                <div id="timelineContainer" class="flex flex-col space-y-8">
+                    <!-- 动态生成朝代时间轴项目 -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 朝代详情区域 -->
+    <section id="dynasties" class="py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">朝代详情</h2>
+            
+            <!-- 朝代选择器 -->
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <div id="dynastyTabs" class="flex flex-wrap gap-2 justify-center">
+                    <!-- 动态生成朝代标签 -->
+                </div>
+            </div>
+            
+            <!-- 朝代详情卡片 -->
+            <div id="dynastyDetails" class="max-w-4xl mx-auto">
+                <!-- 动态生成朝代详情 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 文化成就区域 -->
+    <section id="culture" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">文化成就</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div class="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">📜</div>
+                    <h3 class="text-2xl font-bold mb-4 text-red-800">文字发展</h3>
+                    <p class="text-gray-700">从甲骨文到简体字，汉字演变见证中华文明传承</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">🏛️</div>
+                    <h3 class="text-2xl font-bold mb-4 text-blue-800">建筑艺术</h3>
+                    <p class="text-gray-700">从宫殿到园林，中国古建筑彰显东方美学</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">🎨</div>
+                    <h3 class="text-2xl font-bold mb-4 text-green-800">书画艺术</h3>
+                    <p class="text-gray-700">诗书画印，四艺合一的传统文化瑰宝</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-2xl font-bold mb-4 text-purple-800">文学成就</h3>
+                    <p class="text-gray-700">诗经楚辞、唐诗宋词，文学巅峰照耀古今</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">🔬</div>
+                    <h3 class="text-2xl font-bold mb-4 text-yellow-800">科技发明</h3>
+                    <p class="text-gray-700">四大发明改变世界，中华智慧惠及人类</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-xl shadow-lg dynasty-card">
+                    <div class="text-4xl mb-4">🏺</div>
+                    <h3 class="text-2xl font-bold mb-4 text-indigo-800">工艺美术</h3>
+                    <p class="text-gray-700">瓷器丝绸、金玉器物，精湛工艺传承千年</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">中华朝代变迁史</h3>
+            <p class="text-gray-400 mb-6">传承五千年文明，弘扬中华文化</p>
+            <div class="flex justify-center space-x-6 text-sm">
+                <span>© 2024 中华文化传承</span>
+                <span>|</span>
+                <span>教育用途</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 朝代数据 - 包含更多朝代
+        const dynasties = [
+            {
+                name: "夏朝",
+                period: "约前2070-前1600年",
+                duration: "约470年",
+                capital: "阳城（今河南登封）",
+                founder: "大禹",
+                description: "中国历史上第一个世袭制王朝，标志着中国从原始社会进入奴隶社会，建立了中国古代王朝的基本模式。",
+                achievements: ["建立世袭制", "青铜器制作", "农业发展", "治水工程"],
+                color: "from-red-400 to-red-600"
+            },
+            {
+                name: "商朝",
+                period: "约前1600-前1046年",
+                duration: "约554年",
+                capital: "亳（今河南商丘）",
+                founder: "成汤",
+                description: "中国历史上第一个有直接文字记载同时有考古证实的王朝，甲骨文的出现标志着中国文字的成熟。",
+                achievements: ["甲骨文", "青铜文明鼎盛", "占卜制度", "商业贸易"],
+                color: "from-orange-400 to-orange-600"
+            },
+            {
+                name: "西周",
+                period: "前1046-前771年",
+                duration: "275年",
+                capital: "镐京（今陕西西安）",
+                founder: "周武王",
+                description: "建立分封制和宗法制，奠定了中国古代政治制度的基础，形成了礼乐文明。",
+                achievements: ["分封制", "宗法制", "礼乐文明", "井田制"],
+                color: "from-yellow-400 to-yellow-600"
+            },
+            {
+                name: "东周",
+                period: "前770-前256年",
+                duration: "514年",
+                capital: "洛邑（今河南洛阳）",
+                founder: "周平王",
+                description: "包括春秋战国时期，百家争鸣，文化思想极度繁荣，奠定了中华文化的基本框架。",
+                achievements: ["百家争鸣", "孔子老子", "铁器时代", "诸侯争霸"],
+                color: "from-green-400 to-green-600"
+            },
+            {
+                name: "秦朝",
+                period: "前221-前206年",
+                duration: "15年",
+                capital: "咸阳（今陕西咸阳）",
+                founder: "秦始皇嬴政",
+                description: "中国历史上第一个统一的多民族的中央集权制国家，建立了影响后世两千年的政治制度。",
+                achievements: ["统一六国", "万里长城", "统一文字货币", "郡县制"],
+                color: "from-blue-400 to-blue-600"
+            },
+            {
+                name: "汉朝",
+                period: "前202-220年",
+                duration: "422年",
+                capital: "长安、洛阳",
+                founder: "刘邦",
+                description: "中国历史上最强盛和影响最深远的王朝之一，奠定了中华民族的基本格局，汉族由此得名。",
+                achievements: ["丝绸之路", "造纸术", "汉文化圈", "太学制度"],
+                color: "from-indigo-400 to-indigo-600"
+            },
+            {
+                name: "三国",
+                period: "220-280年",
+                duration: "60年",
+                capital: "洛阳、成都、建业",
+                founder: "曹丕、刘备、孙权",
+                description: "魏蜀吴三国鼎立，群雄并起，英雄辈出，成为中国历史上最具传奇色彩的时代之一。",
+                achievements: ["三国鼎立", "诸葛亮治蜀", "赤壁之战", "文学繁荣"],
+                color: "from-cyan-400 to-cyan-600"
+            },
+            {
+                name: "晋朝",
+                period: "266-420年",
+                duration: "154年",
+                capital: "洛阳、建康",
+                founder: "司马炎",
+                description: "统一三国后建立的王朝，但很快陷入内乱，后期迁都建康，文化艺术仍有发展。",
+                achievements: ["统一三国", "竹林七贤", "书法艺术", "佛教传播"],
+                color: "from-teal-400 to-teal-600"
+            },
+            {
+                name: "隋朝",
+                period: "581-618年",
+                duration: "37年",
+                capital: "大兴（今西安）",
+                founder: "杨坚",
+                description: "结束了长期分裂局面，重新统一中国，为唐朝的繁荣奠定了基础。",
+                achievements: ["重新统一", "科举制", "大运河", "三省六部制"],
+                color: "from-emerald-400 to-emerald-600"
+            },
+            {
+                name: "唐朝",
+                period: "618-907年",
+                duration: "289年",
+                capital: "长安（今西安）",
+                founder: "李渊",
+                description: "中国古代最强盛开放的王朝，国际地位崇高，文化艺术达到巅峰，被誉为中华文明的黄金时代。",
+                achievements: ["盛唐气象", "诗歌繁荣", "丝路贸易", "开放包容"],
+                color: "from-purple-400 to-purple-600"
+            },
+            {
+                name: "宋朝",
+                period: "960-1279年",
+                duration: "319年",
+                capital: "开封、杭州",
+                founder: "赵匡胤",
+                description: "经济文化高度发达，科技成就辉煌，商业繁荣，虽军事较弱但文治达到历史高峰。",
+                achievements: ["四大发明完善", "理学思想", "商业革命", "文化繁荣"],
+                color: "from-pink-400 to-pink-600"
+            },
+            {
+                name: "元朝",
+                period: "1271-1368年",
+                duration: "97年",
+                capital: "大都（今北京）",
+                founder: "忽必烈",
+                description: "由蒙古族建立的王朝，疆域空前辽阔，促进了中外文化交流，但统治相对较短。",
+                achievements: ["疆域辽阔", "中外交流", "马可波罗", "行省制度"],
+                color: "from-rose-400 to-rose-600"
+            },
+            {
+                name: "明朝",
+                period: "1368-1644年",
+                duration: "276年",
+                capital: "南京、北京",
+                founder: "朱元璋",
+                description: "中国历史上最后一个由汉族建立的大一统王朝，农业手工业商业繁荣，但后期逐渐闭关锁国。",
+                achievements: ["郑和下西洋", "紫禁城建设", "《永乐大典》", "资本主义萌芽"],
+                color: "from-red-500 to-red-700"
+            },
+            {
+                name: "清朝",
+                period: "1636-1912年",
+                duration: "276年",
+                capital: "北京",
+                founder: "努尔哈赤",
+                description: "中国历史上最后一个封建王朝，由满族建立，前期康乾盛世，后期在列强入侵下逐渐衰落。",
+                achievements: ["康乾盛世", "《四库全书》", "疆域巩固", "民族融合"],
+                color: "from-gray-500 to-gray-700"
+            }
+        ];
+
+        let currentDynasty = 0;
+
+        // 初始化页面
+        function initPage() {
+            console.log('页面初始化开始，朝代数量：', dynasties.length);
+            generateTimeline();
+            generateDynastyTabs();
+            showDynastyDetails(0);
+            setupScrollAnimation();
+            console.log('页面初始化完成');
+        }
+
+        // 生成时间轴
+        function generateTimeline() {
+            const container = document.getElementById('timelineContainer');
+            if (!container) {
+                console.error('时间轴容器未找到');
+                return;
+            }
+            
+            container.innerHTML = ''; // 清空容器
+            
+            dynasties.forEach((dynasty, index) => {
+                const isLeft = index % 2 === 0;
+                const item = document.createElement('div');
+                
+                // 使用更简单的布局方式
+                item.className = `relative w-full flex ${isLeft ? 'justify-end pr-8' : 'justify-start pl-8'} mb-8`;
+                
+                item.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl shadow-lg dynasty-card relative max-w-md cursor-pointer hover:shadow-xl transition-all duration-300" 
+                         onclick="showDynastyDetails(${index})">
+                        <div class="absolute top-1/2 ${isLeft ? '-right-6' : '-left-6'} w-8 h-8 bg-gradient-to-r ${dynasty.color} rounded-full transform -translate-y-1/2 border-4 border-white shadow-md z-10"></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${dynasty.name}</h3>
+                        <p class="text-gray-600 text-sm mb-2">${dynasty.period}</p>
+                        <p class="text-gray-700 text-sm line-clamp-3">${dynasty.description}</p>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+            
+            console.log('时间轴生成完成，创建了', dynasties.length, '个项目');
+        }
+
+        // 生成朝代标签
+        function generateDynastyTabs() {
+            const container = document.getElementById('dynastyTabs');
+            if (!container) {
+                console.error('朝代标签容器未找到');
+                return;
+            }
+            
+            container.innerHTML = ''; // 清空容器
+            
+            dynasties.forEach((dynasty, index) => {
+                const tab = document.createElement('button');
+                tab.className = `px-4 py-2 rounded-full text-sm font-medium transition-all dynasty-tab bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 border border-gray-200`;
+                tab.textContent = dynasty.name;
+                tab.onclick = () => showDynastyDetails(index);
+                
+                container.appendChild(tab);
+            });
+            
+            updateTabStates();
+            console.log('朝代标签生成完成，创建了', dynasties.length, '个标签');
+        }
+
+        // 显示朝代详情
+        function showDynastyDetails(index) {
+            if (index < 0 || index >= dynasties.length) {
+                console.error('无效的朝代索引：', index);
+                return;
+            }
+            
+            currentDynasty = index;
+            const dynasty = dynasties[index];
+            const container = document.getElementById('dynastyDetails');
+            
+            if (!container) {
+                console.error('朝代详情容器未找到');
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
+                    <div class="bg-gradient-to-r ${dynasty.color} p-8 text-white">
+                        <h3 class="text-4xl font-bold mb-2">${dynasty.name}</h3>
+                        <p class="text-xl opacity-90">${dynasty.period}</p>
+                    </div>
+                    
+                    <div class="p-8">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-2xl font-bold text-gray-800 mb-4">基本信息</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-start">
+                                        <span class="w-20 text-gray-600 font-medium">存续：</span>
+                                        <span class="font-semibold">${dynasty.duration}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="w-20 text-gray-600 font-medium">都城：</span>
+                                        <span class="font-semibold">${dynasty.capital}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="w-20 text-gray-600 font-medium">开创者：</span>
+                                        <span class="font-semibold">${dynasty.founder}</span>
+                                    </div>
+                                </div>
+                                
+                                <h4 class="text-2xl font-bold text-gray-800 mb-4 mt-8">历史描述</h4>
+                                <p class="text-gray-700 leading-relaxed">${dynasty.description}</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-2xl font-bold text-gray-800 mb-4">主要成就</h4>
+                                <div class="space-y-3">
+                                    ${dynasty.achievements.map(achievement => `
+                                        <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                            <div class="w-2 h-2 bg-gradient-to-r ${dynasty.color} rounded-full mr-3 flex-shrink-0"></div>
+                                            <span class="text-gray-700">${achievement}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <div class="mt-8 p-4 bg-gradient-to-r ${dynasty.color} bg-opacity-10 rounded-lg">
+                                    <p class="text-sm text-gray-600 text-center">
+                                        点击其他朝代标签了解更多历史
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            updateTabStates();
+            console.log('显示朝代详情：', dynasty.name);
+        }
+
+        // 更新标签状态
+        function updateTabStates() {
+            const tabs = document.querySelectorAll('.dynasty-tab');
+            tabs.forEach((tab, index) => {
+                if (index === currentDynasty) {
+                    tab.className = `px-4 py-2 rounded-full text-sm font-medium transition-all dynasty-tab active-dynasty`;
+                } else {
+                    tab.className = `px-4 py-2 rounded-full text-sm font-medium transition-all dynasty-tab bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 border border-gray-200`;
+                }
+            });
+        }
+
+        // 滚动动画
+        function setupScrollAnimation() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '-50px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // 为所有需要滚动动画的元素添加观察
+            setTimeout(() => {
+                document.querySelectorAll('.scroll-fade').forEach(el => {
+                    observer.observe(el);
+                });
+            }, 100);
+        }
+
+        // 平滑滚动
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，开始初始化');
+            initPage();
+        });
+
+        // 导航链接点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    scrollToSection(targetId);
+                });
+            });
+        });
+
+        // 添加一些调试信息
+        window.debugInfo = function() {
+            console.log('朝代数量：', dynasties.length);
+            console.log('当前朝代：', currentDynasty);
+            console.log('时间轴容器：', document.getElementById('timelineContainer'));
+            console.log('朝代标签容器：', document.getElementById('dynastyTabs'));
+            console.log('朝代详情容器：', document.getElementById('dynastyDetails'));
+        };
+    </script>
+</body>
+</html>
